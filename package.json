@@ -1,0 +1,64 @@
+{
+  "name": "weh",
+  "version": "0.0.1-alpha.0",
+  "description": "Web Extension Host for Indiebase",
+  "author": "Han <han@deskbtm.com>",
+  "private": true,
+  "license": "AGPL-3.0",
+  "engines": {
+    "yarn": ">2.0.0",
+    "node": ">=20.0.0",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn"
+  },
+  "scripts": {
+    "lint": "eslint . --fix",
+    "release": "standard-version",
+    "prepare": "husky install",
+    "syncpack": "syncpack",
+    "mismatches": "syncpack list-mismatches",
+    "eslint-inspector": "eslint-config-inspector",
+    "prettier": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/compat": "1.1.1",
+    "@eslint/config-inspector": "0.5.2",
+    "@next/eslint-plugin-next": "14.2.5",
+    "@typescript-eslint/parser": "^8.0.0-alpha.55",
+    "@vitest/ui": "2.0.4",
+    "cross-env": "7.0.3",
+    "cz-conventional-changelog": "3.3.0",
+    "dotenv-cli": "7.4.2",
+    "eslint": "9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-react": "7.35.0",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "eslint-plugin-react-refresh": "0.4.9",
+    "eslint-plugin-simple-import-sort": "12.1.1",
+    "globals": "15.8.0",
+    "husky": "9.0.11",
+    "prettier": "3.3.3",
+    "shx": "0.3.4",
+    "standard-version": "9.5.0",
+    "syncpack": "12.3.2",
+    "typescript": "5.5.4",
+    "typescript-eslint": "8.0.1",
+    "vitest": "^2.0.5"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "packageManager": "yarn@4.4.0",
+  "dependencies": {
+    "type-fest": "4.23.0"
+  }
+}

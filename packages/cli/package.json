@@ -1,0 +1,46 @@
+{
+  "name": "@indiebase/weh-cli",
+  "version": "0.0.1-alpha.0",
+  "description": "Web Extension Host Extension CLI",
+  "author": "Han <han@deskbtm.com>",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./*": {
+        "types": "./dist/*.d.ts",
+        "default": "./dist/*.js"
+      }
+    }
+  },
+  "engines": {
+    "yarn": ">2.0.0",
+    "node": ">=20.0.0",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn"
+  },
+  "scripts": {
+    "prettier": "prettier --check ."
+  },
+  "devDependencies": {
+    "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1"
+  }
+}

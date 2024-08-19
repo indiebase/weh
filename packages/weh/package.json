@@ -1,0 +1,48 @@
+{
+  "name": "@indiebase/weh",
+  "version": "0.0.1-alpha.0",
+  "description": "Web Extension Host for Indiebase",
+  "author": "Han <han@deskbtm.com>",
+  "private": true,
+  "license": "AGPL-3.0",
+  "type": "module",
+  "engines": {
+    "yarn": ">2.0.0",
+    "node": ">=20.0.0",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn"
+  },
+  "scripts": {
+    "prettier": "prettier --check .",
+    "start": "tsx watch ./src/preset.ts --clear-screen=false --ignore .weh",
+    "test": "vitest",
+    "gen:zod": "ts-to-zod ../edk/src/manifest/manifest.ts ./src/manifest-schema.ts"
+  },
+  "devDependencies": {
+    "@types/debug": "4.1.12",
+    "@types/pg": "8.11.6",
+    "@types/unzipper": "0.10.10",
+    "pino-pretty": "11.2.2",
+    "ts-to-zod": "^3.11.0",
+    "tsx": "4.17.0",
+    "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "@deskbtm/gadgets": "0.0.1-alpha.11",
+    "@dotenvx/dotenvx": "^1.7.0",
+    "@hono/node-server": "1.12.0",
+    "@hono/swagger-ui": "0.4.0",
+    "@hono/zod-openapi": "0.15.3",
+    "@indiebase/weh-edk": "workspace:^",
+    "cross-env": "7.0.3",
+    "debug": "4.3.6",
+    "hono": "4.5.4",
+    "knex": "3.1.0",
+    "obfuscation-detector": "1.1.7",
+    "pg": "8.12.0",
+    "pino": "9.3.2",
+    "undici": "^6.19.7",
+    "unzipper": "0.12.3",
+    "zod": "3.23.8"
+  }
+}

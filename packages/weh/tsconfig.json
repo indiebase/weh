@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "composite": true,
+    "baseUrl": ".",
+    "outDir": "./dist"
+  },
+  "include": [
+    "src/**/*.ts",
+    "specs/**/*.spec.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

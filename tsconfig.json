@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "jsx": "react",
+    // JavaScript Support
+    "allowJs": false,
+    // Type Checking
+    "strict": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strictBindCallApply": false,
+    "noImplicitAny": false,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitOverride": true,
+    "noImplicitReturns": false,
+    // Output Formatting
+    "pretty": true,
+    // Interop
+    "forceConsistentCasingInFileNames": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // Emit
+    "importHelpers": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "removeComments": false,
+    // Language and Environment
+    "target": "ES2020",
+    "lib": [
+      "ESNext",
+    ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true
+  }
+}

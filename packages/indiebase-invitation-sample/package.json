@@ -1,0 +1,30 @@
+{
+  "name": "@indiebase/ext.invitation",
+  "version": "0.0.1-alpha.0",
+  "description": "Web Extension Hosted Example Extension",
+  "author": "Han <han@deskbtm.com>",
+  "private": true,
+  "license": "AGPL-3.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": {
+      "default": "./src/manifest.ts",
+      "server": "./src/server/index.ts"
+    }
+  },
+  "engines": {
+    "yarn": ">2.0.0",
+    "node": ">=20.0.0",
+    "npm": "please-use-yarn",
+    "pnpm": "please-use-yarn"
+  },
+  "scripts": {
+    "prettier": "prettier --check ."
+  },
+  "devDependencies": {
+    "typescript": "5.5.4"
+  },
+  "dependencies": {
+    "@indiebase/weh-edk": "workspace:^"
+  }
+}
