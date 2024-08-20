@@ -5,6 +5,8 @@ import { serve } from '@hono/node-server';
 import { app } from './app';
 import { importScript, isWithinPath, logger } from './helper';
 import { NodeModuleExtHook } from './helper/module-extension-hook';
+import { db } from './db';
+import { MigrationSource, WehTables } from './migrations';
 
 export interface RunningOptions {
   port?: number;
@@ -42,6 +44,14 @@ export class WebExtensionHost {
     }
 
     return this.#instance;
+  }
+
+  async initializeDatabase() {
+    await db.migrate.up({
+      migrationSource: new MigrationSource('public'),
+      tableName: WehTables._migrations,
+      // schemaName: ,
+    });
   }
 
   async run(options?: ServeOptions) {

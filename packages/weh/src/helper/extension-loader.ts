@@ -6,21 +6,12 @@ import { Readable } from 'node:stream';
 import { did } from '@deskbtm/gadgets/did';
 import { Manifest } from '@indiebase/weh-edk';
 import { HTTPException } from 'hono/http-exception';
+import { EXTENSIONS_HOME } from 'src/constants';
 import unzipper from 'unzipper';
 
-import { EXTENSIONS_HOME } from './constants';
-import { importScript } from './helper';
-import { logger } from './helper/logger';
+import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
-
-// abstract class ExtensionLoaderLifecycle {
-//   /**
-//    * Security checkup.
-//    */
-//   abstract checkup(code: string): void;
-
-//   abstract manifest(): void;
-// }
+import { importScript } from './utils';
 
 export class ExtensionLoader {
   public async installFromLocal(path: string) {
@@ -36,11 +27,20 @@ export class ExtensionLoader {
 
     const wehDir = await this.prepareHome();
     const extDir = resolve(wehDir, file.name.replace(extname(file.name), ''));
-    console.log(extDir);
-    const extManifestPath = resolve(extDir, 'manifest.js');
+
+    const extManifestPath = resolve(extDir, 'manifest.jsc');
 
     await this.extract(file, wehDir, extDir);
-    const manifest = await importScript(extManifestPath);
+    const manifest = await importScript(extManifestPath).catch((error) => {
+      if (error?.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new HTTPException(400, {
+          message: `manifest.js is not found in ${file.name}`,
+        });
+      }
+      throw new HTTPException(400, {
+        message: `Installer package ${file.name} is not available`,
+      });
+    });
     const legalManifest = await this.validateManifest(manifest);
     const { packageName, version } = legalManifest;
     await afs.rename(extDir, resolve(wehDir, `${packageName}@${version}`));
@@ -53,7 +53,7 @@ export class ExtensionLoader {
         .pipe(unzipper.Extract({ path: wehDir }))
         .on('error', async (error) => {
           logger.error(error);
-          // await afs.rm(extDir, { recursive: true, force: true });
+          await afs.rm(extDir, { recursive: true, force: true });
           throw new HTTPException(400, {
             message: `Installer package ${file.name} is not available`,
           });

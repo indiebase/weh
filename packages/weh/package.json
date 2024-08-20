@@ -14,9 +14,9 @@
   },
   "scripts": {
     "prettier": "prettier --check .",
-    "start": "tsx watch ./src/preset.ts --clear-screen=false --ignore .weh",
+    "start": "cross-env NODE_ENV=development tsx watch ./src/preset.ts --clear-screen=false --ignore .weh",
     "test": "vitest",
-    "gen:zod": "ts-to-zod ../edk/src/manifest/manifest.ts ./src/manifest-schema.ts"
+    "gen:zod": "ts-to-zod ../edk/src/manifest/manifest.ts ./src/helper/manifest-schema.ts"
   },
   "devDependencies": {
     "@types/debug": "4.1.12",
@@ -29,19 +29,19 @@
   },
   "dependencies": {
     "@deskbtm/gadgets": "0.0.1-alpha.11",
-    "@dotenvx/dotenvx": "^1.7.0",
     "@hono/node-server": "1.12.0",
     "@hono/swagger-ui": "0.4.0",
     "@hono/zod-openapi": "0.15.3",
     "@indiebase/weh-edk": "workspace:^",
     "cross-env": "7.0.3",
     "debug": "4.3.6",
-    "hono": "4.5.4",
+    "dotenv-flow": "4.1.0",
+    "hono": "4.5.6",
     "knex": "3.1.0",
     "obfuscation-detector": "1.1.7",
     "pg": "8.12.0",
     "pino": "9.3.2",
-    "undici": "^6.19.7",
+    "undici": "6.19.7",
     "unzipper": "0.12.3",
     "zod": "3.23.8"
   }

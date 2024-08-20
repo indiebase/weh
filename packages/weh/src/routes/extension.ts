@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { TrieRouter } from 'hono/router/trie-router';
-import { ExtensionLoader } from 'src/extension-loader';
+
+import { ExtensionLoader } from '../helper';
 
 const extension = new OpenAPIHono({ router: new TrieRouter() });
 
@@ -21,6 +22,7 @@ const installRoute = createRoute({
                 format: 'binary',
                 type: 'string',
               }),
+              namespace: z.string().optional(),
             })
             .required(),
         },

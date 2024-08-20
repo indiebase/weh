@@ -1,8 +1,7 @@
 import detectObfuscation from 'obfuscation-detector';
 import { EXTENSIONS_HOME } from 'src/constants';
-import { isWithinPath } from 'src/helper';
 
-import { InteractiveError } from '../errors';
+import { InteractiveError, isWithinPath } from '../helper';
 import { detectMinified } from './utils';
 
 type ObfuscationTypes =

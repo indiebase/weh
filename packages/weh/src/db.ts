@@ -1,12 +1,13 @@
 import knex from 'knex';
 
-export const pg = knex({
-  client: 'pg',
+export const db = knex({
+  client: process.env.DB_CLIENT,
   connection: {
-    host: 'api-dev.indiebase.deskbtm.com',
-    port: 5432,
-    user: 'postgres',
-    database: 'indiebase-dev',
-    password: 'dev@indiebase.com',
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT),
+    user: process.env.DB_USER,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
   },
+  debug: kDevMode,
 });
