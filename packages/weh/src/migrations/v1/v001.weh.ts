@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
+import { WehTables } from '@indiebase/weh-sdk/weh-tables';
+import { type Knex } from 'knex';
 
-import { WehTables } from '../tables';
 import { KnexSchemaEx } from '../utils';
 
 export const v001_weh = async function (
@@ -8,10 +8,10 @@ export const v001_weh = async function (
 ): Promise<Knex.Migration> {
   return {
     async up(knex: Knex): Promise<void> {
-      const knexEx = new KnexSchemaEx(knex);
-      const knexExSchema = await knexEx.withSchema(schema).initBuiltinFuncs();
+      const knexExSchema = new KnexSchemaEx(knex).withSchema(schema);
+      await knexExSchema.initBuiltinFuncs();
 
-      knexExSchema
+      knexExSchema.schema
         .createTable(WehTables.extensions, (table) => {
           table.uuid('id', { primaryKey: true }).defaultTo(knex.fn.uuid());
           table.string('name').notNullable();
@@ -24,9 +24,9 @@ export const v001_weh = async function (
         });
     },
     async down(knex: Knex) {
-      // for (const tableName in MgrTables) {
-      //   await knex.schema.withSchema(schema).dropTable(tableName);
-      // }
+      for (const tableName in WehTables) {
+        await knex.schema.withSchema(schema).dropTable(tableName);
+      }
     },
   };
 };

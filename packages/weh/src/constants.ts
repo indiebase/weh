@@ -6,3 +6,5 @@ export const BUILT_IN_ROUTES = [];
 export const EXTENSIONS_HOME = resolve(homedir(), '.weh');
 
 export const WEH = 'weh';
+
+export const WEH_LOG_PATH = '/var/log/weh/';

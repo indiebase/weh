@@ -38,6 +38,7 @@
     "prettier": "prettier --check ."
   },
   "devDependencies": {
+    "@types/http-proxy": "1.17.15",
     "typescript": "5.5.4"
   },
   "dependencies": {

@@ -11,7 +11,7 @@ export interface NetworkManifest {
   };
 }
 
-export interface AuthorManifest {
+export interface publisherManifest {
   /**
    * Author name
    */
@@ -57,6 +57,15 @@ export interface FsManifest {
   allow?: string[];
 }
 
+export interface _MetadataManifest {
+  publisherId: string;
+}
+
+/**
+ * The manifest interface for registering extensions
+ *
+ * @public
+ */
 export interface Manifest {
   /**
    * Headless app script entry.
@@ -102,10 +111,10 @@ export interface Manifest {
    */
   manifestVersion: number;
   /**
-   * App author information.
+   * App publisher information.
    * {@link Author}
    */
-  author: AuthorManifest;
+  publisher: publisherManifest;
   /**
    * Homepage url
    */
@@ -140,6 +149,11 @@ export interface Manifest {
    * Network config, allowlist
    */
   network?: NetworkManifest;
+
+  /**
+   * The metadata manifest. For the author, this is private.
+   */
+  _metadata?: _MetadataManifest;
 
   // To compact other versions
   [k: string]: unknown;

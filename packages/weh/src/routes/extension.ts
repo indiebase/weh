@@ -1,8 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { TrieRouter } from 'hono/router/trie-router';
 
-import { ExtensionLoader } from '../helper';
-
+import { extService } from '../services';
 const extension = new OpenAPIHono({ router: new TrieRouter() });
 
 const installRoute = createRoute({
@@ -23,6 +22,7 @@ const installRoute = createRoute({
                 type: 'string',
               }),
               namespace: z.string().optional(),
+              publisherId: z.string().optional(),
             })
             .required(),
         },
@@ -42,12 +42,12 @@ const installRoute = createRoute({
 });
 
 extension.openapi(installRoute, async (c) => {
-  const { file } = c.req.valid('form');
+  const { file, namespace } = c.req.valid('form');
+  await extService.install(namespace, file);
 
-  const loader = new ExtensionLoader();
-  await loader.installFromWebStream(file);
-
-  return c.json({});
+  return c.json({
+    message: 'Extension installed',
+  });
 });
 
 export { extension };

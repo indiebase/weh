@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import { type Knex } from 'knex';
 
 import { v001_weh } from './v1/v001.weh';
 

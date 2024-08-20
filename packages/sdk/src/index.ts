@@ -1,1 +1,2 @@
-export const tag = 1;
+export * from './proxy';
+export * from './weh-tables';

@@ -1,7 +1,8 @@
-import { Knex, SchemaBuilder } from 'knex';
+import { type Knex } from 'knex';
 
 export class KnexSchemaEx {
   private schemaName!: string;
+  public schema!: Knex.SchemaBuilder;
 
   constructor(private readonly knex: Knex) {}
 
@@ -24,11 +25,10 @@ export class KnexSchemaEx {
    * Init some preset functions;
    * @returns
    */
-  public async initBuiltinFuncs(): Promise<SchemaBuilder> {
+  public async initBuiltinFuncs() {
     await this.knex.raw(this.ON_UPDATE_TIMESTAMP_FUNCTION());
-    const schema = this.knex.schema.withSchema(this.schemaName);
 
-    return schema;
+    return this;
   }
 
   public createUpdatedAtTrigger = (tableName: string) => {
@@ -44,6 +44,7 @@ export class KnexSchemaEx {
 
   public withSchema(schema: string) {
     this.schemaName = schema;
+    this.schema = this.knex.schema.withSchema(schema);
     return this;
   }
 }

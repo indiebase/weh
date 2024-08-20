@@ -1,12 +1,10 @@
-import { resolve } from 'node:path';
-
 import { serve } from '@hono/node-server';
+import { WehTables } from '@indiebase/weh-sdk/weh-tables';
 
 import { app } from './app';
-import { importScript, isWithinPath, logger } from './helper';
-import { NodeModuleExtHook } from './helper/module-extension-hook';
-import { db } from './db';
-import { MigrationSource, WehTables } from './migrations';
+import { createConnection, db } from './db';
+import { logger } from './helper';
+import { MigrationSource } from './migrations/MigrationSource';
 
 export interface RunningOptions {
   port?: number;
@@ -27,7 +25,7 @@ export class WebExtensionHost {
 
   static #instance: WebExtensionHost;
 
-  static warmup() {
+  static async warmup(callback?: () => Promise<void>) {
     if (!this.#instance) {
       // NodeModuleExtHook.on('.js', async (filename, source) => {
       //   try {
@@ -43,15 +41,10 @@ export class WebExtensionHost {
       this.#instance = new WebExtensionHost();
     }
 
-    return this.#instance;
-  }
+    await callback?.();
+    createConnection();
 
-  async initializeDatabase() {
-    await db.migrate.up({
-      migrationSource: new MigrationSource('public'),
-      tableName: WehTables._migrations,
-      // schemaName: ,
-    });
+    return this.#instance;
   }
 
   async run(options?: ServeOptions) {

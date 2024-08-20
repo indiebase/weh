@@ -1,34 +1,31 @@
 import { promises as afs } from 'node:fs';
-import { request } from 'node:http';
 import { extname, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 
 import { did } from '@deskbtm/gadgets/did';
 import { Manifest } from '@indiebase/weh-edk';
+import { WehTables } from '@indiebase/weh-sdk/weh-tables';
 import { HTTPException } from 'hono/http-exception';
-import { EXTENSIONS_HOME } from 'src/constants';
 import unzipper from 'unzipper';
 
+import { EXTENSIONS_HOME } from '../constants';
+import { db } from '../db';
+import { MigrationSource } from '../migrations';
+import { Extension } from '../models/extension';
+import { InternalServerErrorException } from './http-exceptions';
 import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
 import { importScript } from './utils';
 
 export class ExtensionLoader {
-  public async installFromLocal(path: string) {
-    const directory = await unzipper.Open.file(path);
-    const dir = await this.prepareHome();
-    await directory.extract({ path: dir });
-  }
-
-  public async installFromWebStream(file: File) {
+  public async installFromWebStream(namespace: string, file: File) {
     if (!file) {
       throw new HTTPException(400, { message: 'File is required' });
     }
 
     const wehDir = await this.prepareHome();
     const extDir = resolve(wehDir, file.name.replace(extname(file.name), ''));
-
-    const extManifestPath = resolve(extDir, 'manifest.jsc');
+    const extManifestPath = resolve(extDir, 'manifest.js');
 
     await this.extract(file, wehDir, extDir);
     const manifest = await importScript(extManifestPath).catch((error) => {
@@ -42,8 +39,30 @@ export class ExtensionLoader {
       });
     });
     const legalManifest = await this.validateManifest(manifest);
-    const { packageName, version } = legalManifest;
+    const { packageName, version, name } = legalManifest;
     await afs.rename(extDir, resolve(wehDir, `${packageName}@${version}`));
+    try {
+      await this.createRegistry(namespace);
+
+      const ext = new Extension(namespace);
+
+      await new Extension(namespace).create({
+        name,
+        path: extDir,
+        manifest: legalManifest,
+      });
+    } catch (error) {
+      logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  private async createRegistry(namespace = 'public') {
+    return db.migrate.up({
+      migrationSource: new MigrationSource(namespace),
+      tableName: WehTables._migrations,
+      schemaName: namespace,
+    });
   }
 
   private async extract(file: File, wehDir: string, extDir: string) {
@@ -81,18 +100,6 @@ export class ExtensionLoader {
     } catch (err) {
       logger.error(err);
     }
-  }
-
-  public async installFromMemory(req: Request) {
-    // const directory = await unzipper.Open.buffer();
-    // const dir = await this.#prepareHome();
-    // await directory.extract({ path: dir });
-  }
-
-  public async installFromRemote(req: Request) {
-    const directory = await unzipper.Open.url(request({}), '');
-    // const dir = await this.#prepareHome();
-    // await directory.extract({ path: dir });
   }
 
   private async prepareHome() {
