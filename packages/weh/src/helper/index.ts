@@ -4,4 +4,5 @@ export * from './http-exceptions';
 export * from './logger';
 export * from './manifest-schema';
 export * from './module-extension-hook';
+export * from './snake-case-converter';
 export * from './utils';

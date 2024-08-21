@@ -1,5 +1,7 @@
 import knex, { Knex } from 'knex';
 
+import { knexSnakeCaseMappers } from './helper';
+
 export let db: Knex;
 
 export function createConnection() {
@@ -13,5 +15,6 @@ export function createConnection() {
       password: process.env.DB_PASSWORD,
     },
     debug: kDevMode,
+    ...knexSnakeCaseMappers(),
   });
 }
