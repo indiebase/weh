@@ -7,4 +7,4 @@ export const EXTENSIONS_HOME = resolve(homedir(), '.weh');
 
 export const WEH = 'weh';
 
-export const WEH_LOG_PATH = '/var/log/weh/';
+export const WEH_LOG_PATH = resolve(EXTENSIONS_HOME, 'log');

@@ -1,10 +1,8 @@
 import { serve } from '@hono/node-server';
-import { WehTables } from '@indiebase/weh-sdk/weh-tables';
 
 import { app } from './app';
-import { createConnection, db } from './db';
+import { createConnection } from './db';
 import { logger } from './helper';
-import { MigrationSource } from './migrations/MigrationSource';
 
 export interface RunningOptions {
   port?: number;
