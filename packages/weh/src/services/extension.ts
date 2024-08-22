@@ -1,8 +1,8 @@
-import { ExtensionLoader } from '../helper';
+import { ExtensionInstaller, InstallRequired } from '../helper';
 
 export const extService = {
-  async install(namespace: string, file: File) {
-    const loader = new ExtensionLoader();
-    await loader.installFromWebStream(namespace, file);
+  async install(options: InstallRequired) {
+    const installer = new ExtensionInstaller();
+    await installer.installFromWebStream(options);
   },
 };

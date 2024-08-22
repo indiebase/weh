@@ -22,7 +22,7 @@ const installRoute = createRoute({
                 type: 'string',
               }),
               namespace: z.string().optional(),
-              publisherId: z.string().optional(),
+              publisherId: z.string(),
             })
             .required(),
         },
@@ -42,8 +42,8 @@ const installRoute = createRoute({
 });
 
 extension.openapi(installRoute, async (c) => {
-  const { file, namespace } = c.req.valid('form');
-  await extService.install(namespace, file);
+  const form = c.req.valid('form');
+  await extService.install(form);
 
   return c.json({
     message: 'Extension installed',

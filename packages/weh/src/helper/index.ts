@@ -1,4 +1,5 @@
 export * from './errors';
+export * from './extension-installer';
 export * from './extension-loader';
 export * from './http-exceptions';
 export * from './logger';
