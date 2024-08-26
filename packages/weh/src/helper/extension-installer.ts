@@ -12,6 +12,7 @@ import { EXTENSIONS_HOME } from '../constants';
 import { db } from '../db';
 import { MigrationSource } from '../migrations';
 import { Extension } from '../models/extension';
+import { createSchemaIfNotExist } from './db-utils';
 import { InternalServerErrorException } from './http-exceptions';
 import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
@@ -50,24 +51,35 @@ export class ExtensionInstaller {
     });
     const legalManifest = await this.validateManifest(manifest);
     const { packageName, version, name } = legalManifest;
-    await afs.rename(extDir, resolve(wehDir, `${packageName}@${version}`));
+    const ext = new Extension(namespace);
+
     try {
       await this.createRegistry(namespace);
+      const extInfo = await ext.findByPackageName(packageName);
 
-      const ext = new Extension(namespace);
-
-      await new Extension(namespace).create({
-        name,
-        path: extDir,
-        manifest: legalManifest,
-      });
+      if (Array.isArray(extInfo) && extInfo.length < 1) {
+        const extId = await ext
+          .create({
+            name,
+            path: extDir,
+            manifest: legalManifest,
+            publisherId,
+            version,
+            packageName,
+          })
+          .returning('id');
+        await afs.rename(extDir, resolve(wehDir, extId[0]));
+      } else {
+      }
     } catch (error) {
-      logger.error(error);
+      logger.error(String(error));
       throw new InternalServerErrorException();
     }
   }
 
   private async createRegistry(namespace = 'public') {
+    await createSchemaIfNotExist(db, namespace);
+
     return db.migrate.up({
       migrationSource: new MigrationSource(namespace),
       tableName: WehTables._migrations,
@@ -81,7 +93,7 @@ export class ExtensionInstaller {
       nodeStream
         .pipe(unzipper.Extract({ path: wehDir }))
         .on('error', async (error) => {
-          logger.error(error);
+          logger.error(String(error));
           await afs.rm(extDir, { recursive: true, force: true });
           throw new HTTPException(400, {
             message: `Installer package ${file.name} is not available`,
@@ -96,7 +108,7 @@ export class ExtensionInstaller {
       const m = await manifestSchema.parseAsync(manifest);
       return m;
     } catch (error) {
-      logger.error(error);
+      logger.error(String(error));
       throw new HTTPException(400, {
         message: 'Manifest validate failed',
         cause: error,
@@ -121,6 +133,4 @@ export class ExtensionInstaller {
 
     return EXTENSIONS_HOME;
   }
-
-  checksum() {}
 }

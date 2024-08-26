@@ -21,8 +21,12 @@ const installRoute = createRoute({
                 format: 'binary',
                 type: 'string',
               }),
-              namespace: z.string().optional(),
-              publisherId: z.string(),
+              namespace: z.string().optional().openapi({
+                default: 'indiebase',
+              }),
+              publisherId: z.string().openapi({
+                default: 'deskbtm',
+              }),
             })
             .required(),
         },

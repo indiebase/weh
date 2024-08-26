@@ -9,7 +9,8 @@ import { WEH_LOG_PATH } from '../constants';
 
 const persistentLog = process.env.PERSISTENT_LOG === 'true';
 
-function printFormat({ timestamp, level, message, stack }: TransformableInfo) {
+function printFormat(info: TransformableInfo) {
+  let { timestamp, level, message, stack } = info;
   message = typeof message === 'object' ? JSON.stringify(message) : message;
   return `${timestamp} [${level}] : ${message} ${stack ?? ''}`;
 }
@@ -25,6 +26,8 @@ const transports: transport[] = [
     ),
   }),
 ];
+
+const exceptionHandlers: transport[] = [];
 
 if (persistentLog) {
   transports.push(
@@ -42,6 +45,15 @@ if (persistentLog) {
       maxFiles: '30d',
     }),
   );
+
+  exceptionHandlers.push(
+    new winston.transports.DailyRotateFile({
+      filename: resolve(WEH_LOG_PATH, 'exceptions-%DATE%.log'),
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '30d',
+    }),
+  );
 }
 
 export const logger = winston.createLogger({
@@ -51,12 +63,5 @@ export const logger = winston.createLogger({
     winston.format.prettyPrint(),
   ),
   transports,
-  exceptionHandlers: [
-    new winston.transports.DailyRotateFile({
-      filename: resolve(WEH_LOG_PATH, 'exceptions-%DATE%.log'),
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '30d',
-    }),
-  ],
+  exceptionHandlers,
 });

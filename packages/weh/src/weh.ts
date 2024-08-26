@@ -32,7 +32,7 @@ export class WebExtensionHost {
       //     // await runtimeSecurityCheckup(filename, source);
       //     return source;
       //   } catch (error) {
-      //     logger.error(error);
+      //     logger.error(String(error));
       //   }
       // });
 

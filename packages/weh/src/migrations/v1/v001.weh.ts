@@ -15,8 +15,11 @@ export const v001_weh = async function (
         .createTable(WehTables.extensions, (table) => {
           table.uuid('id', { primaryKey: true }).defaultTo(knex.fn.uuid());
           table.string('name').notNullable();
+          table.string('version').notNullable();
           table.string('path').notNullable();
+          table.string('package_name').notNullable();
           table.json('manifest').notNullable();
+          table.string('publisher_id').notNullable();
           table.timestamps(true, true);
         })
         .then(async () => {

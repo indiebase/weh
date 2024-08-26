@@ -1,3 +1,4 @@
+export * from './db-utils';
 export * from './errors';
 export * from './extension-installer';
 export * from './extension-loader';

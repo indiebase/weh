@@ -6,7 +6,9 @@ export interface ExtensionProps {
   id?: string;
   name?: string;
   path?: string;
+  publisherId?: string;
   packageName?: string;
+  version?: string;
   manifest?: Record<string, any>;
 }
 
@@ -14,10 +16,10 @@ export class Extension {
   constructor(private readonly schema: string) {}
 
   public create(props: ExtensionProps) {
-    const { name, path, packageName, manifest } = props;
+    const { name, path, packageName, manifest, publisherId, version } = props;
     return db
       .withSchema(this.schema)
-      .insert({ name, path, packageName, manifest })
+      .insert({ name, path, packageName, manifest, publisherId, version })
       .into(WehTables.extensions);
   }
 
@@ -30,11 +32,11 @@ export class Extension {
   }
 
   public update(props: ExtensionProps) {
-    const { name, path, manifest, packageName } = props;
+    const { name, path, manifest, packageName, version, publisherId } = props;
     return db
       .withSchema(this.schema)
       .where('package_name', packageName)
-      .update({ name, path, manifest, packageName })
+      .update({ name, path, manifest, packageName, version, publisherId })
       .into(WehTables.extensions);
   }
 }
