@@ -13,7 +13,7 @@ export const v001_weh = async function (
 
       knexExSchema.schema
         .createTable(WehTables.extensions, (table) => {
-          table.uuid('id', { primaryKey: true }).defaultTo(knex.fn.uuid());
+          table.uuid('id', { primaryKey: true }).notNullable();
           table.string('name').notNullable();
           table.string('version').notNullable();
           table.string('path').notNullable();

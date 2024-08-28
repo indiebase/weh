@@ -8,7 +8,7 @@ import { WehTables } from '@indiebase/weh-sdk/weh-tables';
 import { HTTPException } from 'hono/http-exception';
 import unzipper from 'unzipper';
 
-import { EXTENSIONS_HOME } from '../constants';
+import { EXTENSIONS_HOME, EXTENSIONS_TMP } from '../constants';
 import { db } from '../db';
 import { MigrationSource } from '../migrations';
 import { Extension } from '../models/extension';
@@ -34,12 +34,15 @@ export class ExtensionInstaller {
       throw new HTTPException(400, { message: 'File is required' });
     }
 
-    const wehDir = await this.prepareHome();
-    const extDir = resolve(wehDir, file.name.replace(extname(file.name), ''));
-    const extManifestPath = resolve(extDir, 'manifest.js');
+    await this.prepare();
 
-    await this.extract(file, wehDir, extDir);
-    const manifest = await importScript(extManifestPath).catch((error) => {
+    const extName = file.name.replace(extname(file.name), '');
+    const extTmpDir = resolve(EXTENSIONS_TMP, extName);
+    const extManifestTmpPath = resolve(extTmpDir, 'manifest.js');
+
+    await this.extract(file, EXTENSIONS_TMP);
+
+    const manifest = await importScript(extManifestTmpPath).catch((error) => {
       if (error?.code === 'ERR_MODULE_NOT_FOUND') {
         throw new HTTPException(400, {
           message: `manifest.js is not found in ${file.name}`,
@@ -56,10 +59,12 @@ export class ExtensionInstaller {
     try {
       await this.createRegistry(namespace);
       const extInfo = await ext.findByPackageName(packageName);
+      const id = db.fn.uuid();
 
       if (Array.isArray(extInfo) && extInfo.length < 1) {
         const extId = await ext
           .create({
+            id,
             name,
             path: extDir,
             manifest: legalManifest,
@@ -68,7 +73,7 @@ export class ExtensionInstaller {
             packageName,
           })
           .returning('id');
-        await afs.rename(extDir, resolve(wehDir, extId[0]));
+        await afs.rename(extDir, resolve(wehDir, extId[0].id));
       } else {
       }
     } catch (error) {
@@ -87,14 +92,13 @@ export class ExtensionInstaller {
     });
   }
 
-  private async extract(file: File, wehDir: string, extDir: string) {
+  private async extract(file: File, wehDir: string) {
     return new Promise((resolve) => {
       const nodeStream = Readable.fromWeb(file.stream());
       nodeStream
         .pipe(unzipper.Extract({ path: wehDir }))
         .on('error', async (error) => {
           logger.error(String(error));
-          await afs.rm(extDir, { recursive: true, force: true });
           throw new HTTPException(400, {
             message: `Installer package ${file.name} is not available`,
           });
@@ -124,13 +128,16 @@ export class ExtensionInstaller {
     }
   }
 
-  private async prepareHome() {
+  private async prepare() {
     const [err, s] = await did(afs.stat(EXTENSIONS_HOME));
+    const [err1, s1] = await did(afs.stat(EXTENSIONS_TMP));
 
     if (err || !s.isDirectory()) {
       await afs.mkdir(EXTENSIONS_HOME, { recursive: true });
     }
 
-    return EXTENSIONS_HOME;
+    if (err1 || !s1.isDirectory()) {
+      await afs.mkdir(EXTENSIONS_TMP, { recursive: true });
+    }
   }
 }

@@ -1,11 +1,11 @@
 import { HTTPException } from 'hono/http-exception';
 import { StatusCode } from 'hono/utils/http-status';
 
-type HTTPExceptionOptions = {
+interface HTTPExceptionOptions {
   res?: Response;
   message?: string;
   cause?: unknown;
-};
+}
 
 export class InternalServerErrorException extends HTTPException {
   constructor(status: StatusCode = 500, options?: HTTPExceptionOptions) {
