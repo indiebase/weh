@@ -17,7 +17,7 @@ export const v001_weh = async function (
           table.string('name').notNullable();
           table.string('version').notNullable();
           table.string('path').notNullable();
-          table.string('package_name').notNullable();
+          table.string('package_name').unique().notNullable();
           table.json('manifest').notNullable();
           table.string('publisher_id').notNullable();
           table.timestamps(true, true);

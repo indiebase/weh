@@ -14,7 +14,8 @@
   },
   "scripts": {
     "prettier": "prettier --check .",
-    "start": "cross-env NODE_ENV=development tsx watch ./src/preset.ts --clear-screen=false --ignore .weh",
+    "start": "cross-env NODE_ENV=development tsx ./src/preset.ts",
+    "start:w": "cross-env NODE_ENV=development tsx watch ./src/preset.ts",
     "test": "vitest",
     "gen:zod": "ts-to-zod ../edk/src/manifest/manifest.ts ./src/helper/manifest-schema.ts"
   },

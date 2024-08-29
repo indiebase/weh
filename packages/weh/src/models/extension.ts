@@ -16,10 +16,11 @@ export class Extension {
   constructor(private readonly schema: string) {}
 
   public create(props: ExtensionProps) {
-    const { name, path, packageName, manifest, publisherId, version } = props;
+    const { id, name, path, packageName, manifest, publisherId, version } =
+      props;
     return db
       .withSchema(this.schema)
-      .insert({ name, path, packageName, manifest, publisherId, version })
+      .insert({ id, name, path, packageName, manifest, publisherId, version })
       .into(WehTables.extensions);
   }
 

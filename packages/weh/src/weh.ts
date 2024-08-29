@@ -25,7 +25,7 @@ export class WebExtensionHost {
 
   static async warmup(callback?: () => Promise<void>) {
     if (!this.#instance) {
-      // NodeModuleExtHook.on('.js', async (filename, source) => {
+      // NodeModuleExtHook.on('weh.js', async (filename, source) => {
       //   try {
       //     // if (isWithinPath(filename, import.meta.dirname)) {
       //     // }
@@ -35,7 +35,6 @@ export class WebExtensionHost {
       //     logger.error(String(error));
       //   }
       // });
-
       this.#instance = new WebExtensionHost();
     }
 

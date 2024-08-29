@@ -4,7 +4,7 @@ import { EXTENSIONS_HOME } from 'src/constants';
 import { InteractiveError, isWithinPath } from '../helper';
 import { detectMinified } from './utils';
 
-type ObfuscationTypes =
+export type ObfuscationTypes =
   | ''
   | 'array_function_replacements'
   | 'array_replacements'
@@ -15,14 +15,6 @@ type ObfuscationTypes =
   | 'augmented_array_function_replacements';
 
 export async function runtimeSecurityCheckup(filename: string, source: string) {
-  // const isExtHome = isWithinPath(filename, EXTENSIONS_HOME);
-
-  // if (!isExtHome) {
-  //   throw new InteractiveError(
-  //     `Source code should not be minified, please check it again.`,
-  //   );
-  // }
-
   const isMinified = detectMinified(source);
   const obfuscatedType: ObfuscationTypes = await detectObfuscation(source);
 

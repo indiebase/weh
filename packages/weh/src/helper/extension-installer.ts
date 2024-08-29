@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { promises as afs } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { Readable } from 'node:stream';
@@ -5,7 +6,6 @@ import { Readable } from 'node:stream';
 import { did } from '@deskbtm/gadgets/did';
 import { Manifest } from '@indiebase/weh-edk';
 import { WehTables } from '@indiebase/weh-sdk/weh-tables';
-import { HTTPException } from 'hono/http-exception';
 import unzipper from 'unzipper';
 
 import { EXTENSIONS_HOME, EXTENSIONS_TMP } from '../constants';
@@ -13,7 +13,10 @@ import { db } from '../db';
 import { MigrationSource } from '../migrations';
 import { Extension } from '../models/extension';
 import { createSchemaIfNotExist } from './db-utils';
-import { InternalServerErrorException } from './http-exceptions';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from './http-exceptions';
 import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
 import { importScript } from './utils';
@@ -31,54 +34,42 @@ export class ExtensionInstaller {
     file,
   }: InstallRequired) {
     if (!file) {
-      throw new HTTPException(400, { message: 'File is required' });
+      throw new BadRequestException({ message: 'File is required' });
     }
 
     await this.prepare();
 
-    const extName = file.name.replace(extname(file.name), '');
-    const extTmpDir = resolve(EXTENSIONS_TMP, extName);
-    const extManifestTmpPath = resolve(extTmpDir, 'manifest.js');
-
-    await this.extract(file, EXTENSIONS_TMP);
-
-    const manifest = await importScript(extManifestTmpPath).catch((error) => {
-      if (error?.code === 'ERR_MODULE_NOT_FOUND') {
-        throw new HTTPException(400, {
-          message: `manifest.js is not found in ${file.name}`,
-        });
-      }
-      throw new HTTPException(400, {
-        message: `Installer package ${file.name} is not available`,
-      });
-    });
-    const legalManifest = await this.validateManifest(manifest);
+    const { legalManifest, extTmpDir } = await this.loadExtensionInfos(file);
     const { packageName, version, name } = legalManifest;
-    const ext = new Extension(namespace);
+    const extEntity = new Extension(namespace);
 
-    try {
-      await this.createRegistry(namespace);
-      const extInfo = await ext.findByPackageName(packageName);
-      const id = db.fn.uuid();
+    await this.createRegistry(namespace);
+    const extInfo = await extEntity.findByPackageName(packageName);
 
-      if (Array.isArray(extInfo) && extInfo.length < 1) {
-        const extId = await ext
-          .create({
-            id,
-            name,
-            path: extDir,
-            manifest: legalManifest,
-            publisherId,
-            version,
-            packageName,
-          })
-          .returning('id');
-        await afs.rename(extDir, resolve(wehDir, extId[0].id));
-      } else {
-      }
-    } catch (error) {
-      logger.error(String(error));
-      throw new InternalServerErrorException();
+    if (Array.isArray(extInfo) && extInfo.length < 1) {
+      const id = randomUUID();
+      const extDir = resolve(EXTENSIONS_HOME, id);
+
+      await afs.cp(extTmpDir, extDir, { recursive: true });
+      await extEntity
+        .create({
+          id,
+          name,
+          path: extDir,
+          manifest: legalManifest,
+          publisherId,
+          version,
+          packageName,
+        })
+        .catch((error) => {
+          logger.error(String(error));
+          throw new InternalServerErrorException();
+        });
+      await afs.rm(extTmpDir, { recursive: true });
+    } else {
+      throw new BadRequestException({
+        message: 'Extension already exists',
+      });
     }
   }
 
@@ -92,6 +83,32 @@ export class ExtensionInstaller {
     });
   }
 
+  private async loadExtensionInfos(file: File) {
+    const extName = file.name.replace(extname(file.name), '');
+    const extTmpDir = resolve(EXTENSIONS_TMP, extName);
+    const extManifestTmpPath = resolve(extTmpDir, 'manifest.js');
+
+    await this.extract(file, EXTENSIONS_TMP);
+
+    const manifest = await importScript(extManifestTmpPath).catch((error) => {
+      if (error?.code === 'ERR_MODULE_NOT_FOUND') {
+        throw new BadRequestException({
+          message: `manifest.js is not found in ${file.name}`,
+        });
+      }
+      throw new BadRequestException({
+        message: `Installer package ${file.name} is not available`,
+      });
+    });
+    const legalManifest = await this.validateManifest(manifest);
+
+    return {
+      legalManifest,
+      extTmpDir,
+      extManifestTmpPath,
+    } as const;
+  }
+
   private async extract(file: File, wehDir: string) {
     return new Promise((resolve) => {
       const nodeStream = Readable.fromWeb(file.stream());
@@ -99,7 +116,7 @@ export class ExtensionInstaller {
         .pipe(unzipper.Extract({ path: wehDir }))
         .on('error', async (error) => {
           logger.error(String(error));
-          throw new HTTPException(400, {
+          throw new BadRequestException({
             message: `Installer package ${file.name} is not available`,
           });
         })
@@ -113,7 +130,7 @@ export class ExtensionInstaller {
       return m;
     } catch (error) {
       logger.error(String(error));
-      throw new HTTPException(400, {
+      throw new BadRequestException({
         message: 'Manifest validate failed',
         cause: error,
       });
