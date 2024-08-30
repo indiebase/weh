@@ -4,9 +4,11 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 import tsEslint from 'typescript-eslint';
+import eslintSecurity from 'eslint-plugin-security';
 
 export default tsEslint.config(
   eslint.configs.recommended,
+  eslintSecurity.configs.recommended,
   ...tsEslint.configs.strict,
   ...tsEslint.configs.stylistic,
   prettierConfig,
@@ -15,13 +17,7 @@ export default tsEslint.config(
     plugins: {
       'simple-import-sort': simpleImportSort,
     },
-    ignores: [
-      '**/dist',
-      '**/node_modules',
-      '**/.next',
-      '**/.yarn',
-      '**/.vscode',
-    ],
+    ignores: ['**/dist', '**/node_modules', '**/.yarn', '**/.vscode'],
     languageOptions: {
       parser: tsEslintParser,
       ecmaVersion: 2022,

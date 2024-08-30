@@ -146,6 +146,7 @@ export class ExtensionInstaller {
   }
 
   private async prepare() {
+    /* eslint-disable security/detect-non-literal-fs-filename*/
     const [err, s] = await did(afs.stat(EXTENSIONS_HOME));
     const [err1, s1] = await did(afs.stat(EXTENSIONS_TMP));
 
@@ -156,5 +157,6 @@ export class ExtensionInstaller {
     if (err1 || !s1.isDirectory()) {
       await afs.mkdir(EXTENSIONS_TMP, { recursive: true });
     }
+    /* eslint-enable security/detect-non-literal-fs-filename*/
   }
 }
