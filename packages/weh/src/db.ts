@@ -15,6 +15,7 @@ export function createConnection() {
       password: process.env.DB_PASSWORD,
     },
     debug: kDevMode,
+
     ...knexSnakeCaseMappers(),
   });
 }
