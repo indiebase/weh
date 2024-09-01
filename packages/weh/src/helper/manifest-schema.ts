@@ -10,7 +10,7 @@ export const networkManifestSchema = z.object({
     .optional(),
 });
 
-export const authorManifestSchema = z.object({
+export const publisherManifestSchema = z.object({
   name: z.string(),
   avatar: z.string().optional(),
   email: z.string(),
@@ -35,6 +35,10 @@ export const fsManifestSchema = z.object({
   allow: z.array(z.string()).optional(),
 });
 
+export const metadataManifestSchema = z.object({
+  publisherId: z.string(),
+});
+
 const permissionsManifestSchema = z.any();
 
 export const manifestSchema = z.record(z.unknown()).and(
@@ -47,7 +51,7 @@ export const manifestSchema = z.record(z.unknown()).and(
     displayName: z.string().optional(),
     version: z.string(),
     manifestVersion: z.number(),
-    author: authorManifestSchema,
+    publisher: publisherManifestSchema,
     homepage: z.string().optional(),
     packageName: z.string(),
     description: z.string().optional(),
@@ -55,5 +59,6 @@ export const manifestSchema = z.record(z.unknown()).and(
     locates: z.array(z.string()).optional(),
     fs: fsManifestSchema.optional(),
     network: networkManifestSchema.optional(),
+    _metadata: metadataManifestSchema.optional(),
   }),
 );

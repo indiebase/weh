@@ -19,7 +19,7 @@ import {
 } from './http-exceptions';
 import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
-import { importScript } from './utils';
+import { createIsolate, importScript } from './utils';
 
 export interface InstallRequired {
   publisherId: string;
@@ -89,6 +89,12 @@ export class ExtensionInstaller {
     const extManifestTmpPath = resolve(extTmpDir, 'manifest.js');
 
     await this.extract(file, EXTENSIONS_TMP);
+
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    const source = await afs.readFile(extManifestTmpPath, 'utf-8');
+    const { isolate, context } = createIsolate({ memoryLimit: 16 });
+
+    (await context).eval(source);
 
     const manifest = await importScript(extManifestTmpPath).catch((error) => {
       if (error?.code === 'ERR_MODULE_NOT_FOUND') {

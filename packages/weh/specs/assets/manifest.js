@@ -14,7 +14,7 @@ exports.default = {
     'fs:read',
     'fs:write',
   ],
-  name: 'Invite new users',
+  name: 'Test extension sample',
   version: '0.0.1',
   manifestVersion: 1,
   author: {
@@ -25,15 +25,16 @@ exports.default = {
     additional: '',
   },
   homepage: '',
-  packageName: 'com.deskbtm.indiebase.ext.invitation',
-  description: 'Indiebase extension: Invite new users',
+  packageName: 'com.deskbtm.indiebase.weh.test-sample',
+  description: 'Weh test extension',
   update: {
     mode: 'npm',
     registry: 'https://npm.com',
   },
   locates: ['en'],
-
   network: {
-    hosts: ['https://indiebase.deskbtm.com'],
+    allow: {
+      hosts: ['https://indiebase.deskbtm.com'],
+    },
   },
 };
