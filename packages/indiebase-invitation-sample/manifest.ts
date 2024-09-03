@@ -1,4 +1,4 @@
-import type { Manifest } from '@indiebase/weh-sdk';
+import type { Manifest } from '@indiebase/weh-edk';
 
 export default {
   type: 'headless',

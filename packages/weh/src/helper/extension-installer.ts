@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 import { randomUUID } from 'node:crypto';
 import { promises as afs } from 'node:fs';
 import { extname, resolve } from 'node:path';
@@ -19,7 +20,7 @@ import {
 } from './http-exceptions';
 import { logger } from './logger';
 import { manifestSchema } from './manifest-schema';
-import { createIsolate, importScript } from './utils';
+import { createIsolate } from './utils';
 
 export interface InstallRequired {
   publisherId: string;
@@ -28,18 +29,18 @@ export interface InstallRequired {
 }
 
 export class ExtensionInstaller {
-  public async installFromWebStream({
-    publisherId,
-    namespace,
-    file,
-  }: InstallRequired) {
+  public async install({ publisherId, namespace, file }: InstallRequired) {
     if (!file) {
       throw new BadRequestException({ message: 'File is required' });
     }
 
     await this.prepare();
-
-    const { legalManifest, extTmpDir } = await this.loadExtensionInfos(file);
+    const { extTmpDir, extManifestTmpPath } = await this.extract(
+      file,
+      EXTENSIONS_TMP,
+    );
+    const source = await afs.readFile(extManifestTmpPath, 'utf-8');
+    const legalManifest = await this.loadInstallManifest(source);
     const { packageName, version, name } = legalManifest;
     const extEntity = new Extension(namespace);
 
@@ -83,40 +84,30 @@ export class ExtensionInstaller {
     });
   }
 
-  private async loadExtensionInfos(file: File) {
+  private async loadInstallManifest(source: string) {
+    const { isolate, context } = await createIsolate({ memoryLimit: 16 });
+    const module = await isolate.compileModule(source);
+
+    await module.instantiate(context, (specifier, referer) => {
+      return referer;
+    });
+    await module.evaluate();
+
+    const defaultExport = await module.namespace.get('default', {
+      copy: true,
+    });
+    const legalManifest = await this.validateManifestSchema(defaultExport);
+    await isolate.dispose();
+
+    return legalManifest;
+  }
+
+  private async extract(file: File, wehDir: string) {
     const extName = file.name.replace(extname(file.name), '');
     const extTmpDir = resolve(EXTENSIONS_TMP, extName);
     const extManifestTmpPath = resolve(extTmpDir, 'manifest.js');
 
-    await this.extract(file, EXTENSIONS_TMP);
-
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    const source = await afs.readFile(extManifestTmpPath, 'utf-8');
-    const { isolate, context } = createIsolate({ memoryLimit: 16 });
-
-    (await context).eval(source);
-
-    const manifest = await importScript(extManifestTmpPath).catch((error) => {
-      if (error?.code === 'ERR_MODULE_NOT_FOUND') {
-        throw new BadRequestException({
-          message: `manifest.js is not found in ${file.name}`,
-        });
-      }
-      throw new BadRequestException({
-        message: `Installer package ${file.name} is not available`,
-      });
-    });
-    const legalManifest = await this.validateManifest(manifest);
-
-    return {
-      legalManifest,
-      extTmpDir,
-      extManifestTmpPath,
-    } as const;
-  }
-
-  private async extract(file: File, wehDir: string) {
-    return new Promise((resolve) => {
+    await new Promise((resolve) => {
       const nodeStream = Readable.fromWeb(file.stream());
       nodeStream
         .pipe(unzipper.Extract({ path: wehDir }))
@@ -128,9 +119,14 @@ export class ExtensionInstaller {
         })
         .on('finish', resolve);
     });
+
+    return {
+      extTmpDir,
+      extManifestTmpPath,
+    } as const;
   }
 
-  private async validateManifest(manifest: Manifest) {
+  private async validateManifestSchema(manifest: Manifest) {
     try {
       const m = await manifestSchema.parseAsync(manifest);
       return m;

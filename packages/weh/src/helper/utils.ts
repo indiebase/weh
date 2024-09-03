@@ -14,12 +14,12 @@ export const isWithinPath = function (child: string, parent: string) {
   return parentTokens.every((t, i) => childTokens[i] === t);
 };
 
-export const createIsolate = function (
+export const createIsolate = async function (
   options?: IsolateOptions,
   contextOptions?: ContextOptions,
 ) {
   const isolate = new Isolate(options);
-  const context = isolate.createContext(contextOptions);
+  const context = await isolate.createContext(contextOptions);
 
   return { isolate, context } as const;
 };

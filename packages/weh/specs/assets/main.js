@@ -1,1 +1,3 @@
-export function main() {}
+export function main() {
+  console.log('-');
+}

@@ -1,5 +1,9 @@
 'use strict';
-exports.default = {
+import * as main from './main';
+
+console.log(main);
+
+export default {
   type: 'headless',
   permissions: [
     'network:state',
@@ -17,7 +21,7 @@ exports.default = {
   name: 'Test extension sample',
   version: '0.0.1',
   manifestVersion: 1,
-  author: {
+  publisher: {
     name: 'Han',
     avatar:
       'https://avatars.githubusercontent.com/u/45007226?s=400&u=8e6ce9e05f673f26ccaf19b792f74fe9c7b7f39e&v=4',

@@ -26,7 +26,8 @@
     "@types/winston": "2.4.4",
     "ts-to-zod": "3.11.0",
     "tsx": "4.17.0",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "unplugin-auto-import": "^0.18.2"
   },
   "dependencies": {
     "@deskbtm/gadgets": "0.0.1-alpha.11",
